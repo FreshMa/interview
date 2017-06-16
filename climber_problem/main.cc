@@ -1,13 +1,92 @@
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
+#include <stdlib.h>
+#include <string>
+#include <set>
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <algorithm>
 
-#define H_ARRAYSIZE(a) \
+using namespace std;
+
+#define H_ARRAYSIZE(a)            \
     ((sizeof(a) / sizeof(*(a))) / \
-    static_cast<size_t>(!(sizeof(a) % sizeof(*(a)))))
+     static_cast<size_t>(!(sizeof(a) % sizeof(*(a)))))
 
-int resolve(const char* input)
+struct Node
 {
-    return 0;
+    int xpos, height, isLeft;
+    Node(int x, int h, int l) : xpos(x), height(h), isLeft(l) {}
+    //要保证在相同的点上，左边(left edge)排在右边(right edge)前面，所以应该是isLeft>rNode.isLeft
+    bool operator<(Node &rNode)
+    {
+        return xpos < rNode.xpos || xpos == rNode.xpos && isLeft > rNode.isLeft;
+    }
+};
+
+int resolve(const char *input)
+{
+    string s = input;
+    istringstream iss(s);
+    string line;
+    vector<Node> nodevec;
+    multiset<int, greater<int>> heap;
+    int result = 0;
+    int maxEnd = 0;
+
+    while (getline(iss, line, '\n'))
+    {
+        if (line.length() > 1)
+        {
+            vector<int> tmp;
+            string num;
+            istringstream inss(line);
+            while (getline(inss, num, ','))
+            {
+                tmp.push_back(atoi(num.c_str()));
+            }
+            maxEnd = max(maxEnd, tmp[1]);
+            nodevec.push_back(Node(tmp[0], tmp[2], 1));
+            nodevec.push_back(Node(tmp[1], tmp[2], 0));
+        }
+    }
+
+    result += maxEnd;
+    sort(nodevec.begin(), nodevec.end());
+
+    for (int i = 0; i < nodevec.size(); ++i)
+    {
+        if (nodevec[i].isLeft == 1)
+        {
+            int tmp = nodevec[i].height;
+            if (heap.empty())
+            {
+                result += tmp;
+            }
+            else if (tmp > *heap.begin())
+            {
+                result += tmp - *heap.begin();
+            }
+            heap.insert(nodevec[i].height);
+        }
+        else
+        {
+            int pre = *heap.begin();
+            heap.erase(heap.find(nodevec[i].height));
+            if (nodevec[i].height == pre && !heap.empty())
+            {
+                result += pre - *heap.begin();
+            }
+            else if (heap.empty())
+            {
+                result += pre;
+            }
+        }
+    }
+
+    return result;
 }
 
 int main(int argc, char* argv[]) 
