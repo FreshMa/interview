@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
         "0\n",
         "3\n10,11,3\n12,15,4\n16,17,1",
         };
-    int expectedSteps[] = {25, 4, 7, 10, 14, 15, 3, 12, 13, 14, 20};
+    int expectedSteps[] = {25, 4, 7, 10, 14, 15, 3, 12, 13, 14, 20, 21, 0, 33, 16};
     for (size_t i = 0; i < H_ARRAYSIZE(input); ++i)
     {
         assert(resolve(input[i]) == expectedSteps[i]);
