@@ -1,17 +1,59 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
+#include <string.h>
 #include "qh_string.h"
 
-
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-    //TODO ÔÚÕâÀïÌí¼Óµ¥Ôª²âÊÔ£¬Ô½¶àÔ½ºÃ£¬´úÂëÂ·¾¶¸²¸ÇÂÊÔ½È«Ô½ºÃ
-    //TODO µ¥Ôª²âÊÔĞ´·¨Çë²Î¿¼INIParserÄÇ¸öÏîÄ¿£¬²»ÒªĞ´Ò»¶Ñprintf£¬ÒªÓÃassert½øĞĞ¶ÏÑÔÅĞ¶Ï¡£
+    //TODO åœ¨è¿™é‡Œæ·»åŠ å•å…ƒæµ‹è¯•ï¼Œè¶Šå¤šè¶Šå¥½ï¼Œä»£ç è·¯å¾„è¦†ç›–ç‡è¶Šå…¨è¶Šå¥½
+    //TODO å•å…ƒæµ‹è¯•å†™æ³•è¯·å‚è€ƒINIParseré‚£ä¸ªé¡¹ç›®ï¼Œä¸è¦å†™ä¸€å †printfï¼Œè¦ç”¨assertè¿›è¡Œæ–­è¨€åˆ¤æ–­ã€‚
+
+    //å››ç§æ‹·è´æ„é€ å‡½æ•°æµ‹è¯•
+    
+    qh::string str1;
+    qh::string str2 = "thisistest";
+    qh::string str3("justfortestit", 5);
+    qh::string str4 = str2;
+    qh::string str5 = str1;
+    qh::string str6 = "";
+
+    //sizeå‡½æ•°
+    assert(str1.size() == 0);
+    assert(str2.size() == 10);
+    assert(str3.size() == 5);
+    assert(str4.size() == 10);
+    assert(str5.size() == 0);
+    assert(str6.size() == 0);
+
+    //c_strå’Œdataå‡½æ•°
+    assert(strcmp(str2.c_str(), "thisistest") == 0);
+    assert(strcmp(str2.data(), "thisistest") == 0);
+    assert(strcmp(str3.data(), "justf") == 0);
+    assert(strcmp(str2.c_str(), "thisistest") == 0);
+    assert(strcmp(str5.c_str(), "") == 0);
+    assert(strcmp(str6.c_str(), "") == 0);
+
+    //èµ‹å€¼è¿ç®—ç¬¦
+    str1 = str3;
+    assert(str1.size() == 5);
+    assert(strcmp(str3.data(), "justf") == 0);
+    str1 = str6;
+    assert(str1.size() == 0);
+    assert(strcmp(str1.data(), "") == 0);
+    
+
+    //é‡è½½[]
+    *str2[2] = '2';
+    assert('2' == *str2[2]);
+
+    //è°ƒç”¨[]å¤±è´¥
+    assert(NULL == str2[20]);
+    assert(NULL == str2[-1]);
 
 #ifdef WIN32
     system("pause");
 #endif
 
-	return 0;
+    return 0;
 }
-

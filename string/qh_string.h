@@ -29,9 +29,8 @@ namespace qh
     private:
         char*  data_;
         size_t len_;
+        void assign(const char* s, int len);
     };
 }
 
 #endif
-
-
