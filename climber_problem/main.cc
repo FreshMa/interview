@@ -80,6 +80,7 @@ int resolve(const char *input)
         else
         {
             int tmp = *heap.begin();
+            //遇到right edge时，说明该线段访问完成，在multiset中删除该线段
             heap.erase(heap.find(nodevec[i].height));
             if (heap.empty())
             {
