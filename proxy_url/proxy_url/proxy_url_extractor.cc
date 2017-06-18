@@ -1,4 +1,3 @@
-
 #include "proxy_url_extractor.h"
 #include <fstream>
 #include <vector>
@@ -99,9 +98,61 @@ namespace qh
     void ProxyURLExtractor::Extract( const KeyItems& keys, const std::string& raw_url, std::string& sub_url )
     {
 #if 1
-        //TODO �������������������Լ��Ĵ���ʵ����������蹦��
+        //TODO 请面试者在这里添加自己的代码实现以完成所需功能
+        Tokener token(raw_url);
+        token.skipTo('?');
+        token.next();
+
+        //忽略重复出现的'?'和'&'
+        while((!token.isEnd() && token.current() == '?') || (token.current() == '&'))
+            token.next();
+
+        std::string key;
+        while(!token.isEnd()){
+            
+            key = token.nextString('='); 
+            /**
+            * 可能出现这种情况:?query&xxx=yyy，此时的key为query&xxx
+            * 所以应该判断此时的key中有没有&符号，如果有，回退到倒数第一个&符号处
+            * 从此处重新开始找合法的key
+            */
+            if(key.find('&') != std::string::npos){
+                token.skipBackTo('&');
+                key = token.nextString('=');
+            }
+
+            if (keys.find(key) != keys.end()) {
+                const char *curPos = token.getCurReadPos();
+                int nreadable = token.getReadableSize();
+
+                //sub_url不为空的情况
+                sub_url = token.nextString('&');
+                /**
+                * sub_url为空有两种情况：
+                * 1）要取的字符串本身为空，如 "&query=&yyy"
+                * 2）要取的字符串在raw_url的末尾，如 "&query=xxx"
+                */
+                if(sub_url.empty() && nreadable > 0){
+                    assert(curPos);
+                    
+                    std::string tmp;
+                    tmp.assign(curPos, nreadable);
+                    //如果目标sub_url本身为空
+                    if(tmp.find('&') != std::string::npos)
+                        break;
+                    //目标url在raw_url的末尾
+                    else
+                        sub_url.assign(tmp);
+                }
+            }
+            token.skipTo('&');
+            token.next();
+            while(!token.isEnd() && token.current() == '&'){
+                token.next();
+            }
+        }
 #else
-        //����һ�ݲο�ʵ�֣�������������¹������ܷ���Ԥ��
+        //这是一份参考实现，但在特殊情况下工作不能符合预期
         Tokener token(raw_url);
         token.skipTo('?');
         token.next(); //skip one char : '?' 
@@ -111,14 +162,12 @@ namespace qh
             if (keys.find(key) != keys.end()) {
                 const char* curpos = token.getCurReadPos();
                 int nreadable = token.getReadableSize();
-
                 /**
                 * case 1: 
                 *  raw_url="http://www.microsofttranslator.com/bv.aspx?from=&to=zh-chs&a=http://hnujug.com/&xx=yy"
                 *  sub_url="http://hnujug.com/"
                 */
                 sub_url = token.nextString('&');
-
                 if (sub_url.empty() && nreadable > 0) {
                     /**
                     * case 2: 
@@ -142,4 +191,3 @@ namespace qh
         return sub_url;
     }
 }
-
