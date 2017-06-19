@@ -60,6 +60,24 @@ void test3()
     assert(c == "3");
 }
 
+void test4()
+{
+    const char* ini_text = "[one]\na=3\nb=2\nc=1[two]\nd=6\ne=5\nf=4";
+    qh::INIParser parser;
+    bool found = false;
+    if(!parser.Parse(ini_text, strlen(ini_text), "\n", "="))
+        assert(false);
+    
+    const std::string& a = parser.Get("one", "a", &found);
+    assert(a == "1");
+
+    std::string b = parser.Get("two", "b", &found);
+    assert(b == "");
+
+    const std::string& e = parser.Get("two", "e", &found);
+    assert(e == "5");
+}
+
 int main(int argc, char* argv[])
 {
     //TODO 在这里添加单元测试，越多越好，代码路径覆盖率越全越好
