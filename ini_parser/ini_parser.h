@@ -15,7 +15,7 @@ namespace qh
         ~INIParser();
 
         //! \brief 解析一个磁盘上的INI文件
-        //! \param[in] - const std::string & ini_file_path
+        //! \param[in] -  const std::string & ini_file_path
         //! \return - bool
         bool Parse(const std::string& ini_file_path);
 
@@ -41,10 +41,17 @@ namespace qh
 
     private:
         //存储Get的结果，防止返回局部变量的引用
+        using ssmap = std::unordered_map<std::string, std::string>;
         std::string find_result;
         std::vector<std::string> params;
-        std::unordered_map<std::string,std::string> kv_map;
-        bool ParsePair(const std::string &line, const std::string &kvsep);
+        std::unordered_map<std::string, ssmap> sec_map;
+        
+
+        void skipComment(std::string &content);
+        void setSecName(std::string &content, std::unordered_map<std::string, int> &sec_names);
+        bool ParseSection(ssmap& kv_map, const std::string &section_content, const std::string &line_sep = "\n", const std::string &kv_sep = "=");
+        bool ParsePair(const std::string &line, const std::string &kvsep, ssmap &kv_map);
+        
     };
 }
 
