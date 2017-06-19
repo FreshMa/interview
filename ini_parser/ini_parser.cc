@@ -84,8 +84,7 @@ namespace qh
             kv_map[key] = value;
             return true;
         }
-        else{
-            return false;
-        }
+
+        return false;
     }
 }
