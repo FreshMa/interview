@@ -104,7 +104,7 @@ namespace qh
         token.next();
 
         //忽略重复出现的'?'和'&'
-        while((!token.isEnd() && token.current() == '?') || (token.current() == '&'))
+        while(!token.isEnd() && (token.current() == '?' || token.current() == '&'))
             token.next();
 
         std::string key;
