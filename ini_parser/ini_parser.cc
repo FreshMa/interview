@@ -2,9 +2,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
-#include <algorithm>
 #include <map>
-#include <utility>
 
 namespace qh
 {
