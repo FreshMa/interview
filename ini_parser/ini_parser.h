@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <map>
 
 namespace qh
 {
@@ -43,13 +44,21 @@ namespace qh
         using ssmap = std::unordered_map<std::string, std::string>;
         //存储Get的结果，防止返回局部变量的引用
         std::string find_result;
-        std::vector<std::string> params;
+        
         std::unordered_map<std::string, ssmap> sec_map;
         
-
+        // 去掉字符串的注释，注释从字符';'和'#'开始直到该行结束
         void skipComment(std::string &content);
-        void setSecName(std::string &content, std::unordered_map<std::string, int> &sec_names);
+
+        //sec_names存放<section出现的位置, section名称>,并按照key值，即pos排序
+        void setSecName(const std::string &content, std::map<int, std::string> &sec_names);
+
+        bool Parse(const std::string &content, const std::string &line_sep, const std::string &kv_sep);
+
+        //对section的内容进行解析，解析结果放到kv_map中
         bool ParseSection(ssmap& kv_map, const std::string &section_content, const std::string &line_sep = "\n", const std::string &kv_sep = "=");
+
+        //section中每一行代表一个键值对，解析该键值对，将结果存放到kv_map中
         bool ParsePair(const std::string &line, const std::string &kvsep, ssmap &kv_map);
         
     };

@@ -1,0 +1,8 @@
+[owner]
+name=John Doe
+organization=Acme Products
+[database]
+server=192.0.2.42
+; use IP address in case network name resolution is not working
+port=143
+file="acme payroll.dat"

@@ -1,6 +1,10 @@
 #include "ini_parser.h"
 #include <sstream>
 #include <iostream>
+#include <fstream>
+#include <algorithm>
+#include <map>
+#include <utility>
 
 namespace qh
 {
@@ -9,25 +13,40 @@ namespace qh
 
     bool INIParser::Parse(const std::string &ini_file_path)
     {
-        return true;
+        std::ifstream ini_file(ini_file_path);
+        if(!ini_file)
+            return false;
+        std::string ini_data;
+        std::string tmp;
+        while(std::getline(ini_file, tmp)){
+            ini_data.append(tmp);
+            ini_data.push_back('\n');
+        }
+        //std::cout<<ini_data<<std::endl;
+        ini_file.close();
+        return Parse(ini_data, "\n", "=");
         
     }
+
     bool INIParser::Parse(const char *ini_data, size_t ini_data_len, const std::string &line_seperator, const std::string &key_value_seperator)
     {
         std::string ini_data_str = ini_data;
-        std::unordered_map<std::string,int> sec_names;
-        std::vector<std::string> sec_content;
+        return Parse(ini_data, line_seperator, key_value_seperator);
+    }
+
+    bool INIParser::Parse(const std::string& ini_data_str, const std::string &line_sep, const std::string &kv_sep)
+    {
+        std::map<int, std::string> sec_names;
+        std::string content = ini_data_str;
 
         //去掉注释
-        skipComment(ini_data_str);
-        
-        //找到section
-        setSecName(ini_data_str, sec_names);
-
-        //如果没有section，直接处理该文本
+        skipComment(content);
+        //保存section
+        setSecName(content, sec_names);
+        //如果没有section标记，将整个内容存放到默认section中
         if(sec_names.empty()){
             ssmap kv_map;
-            if(ParseSection(kv_map, ini_data_str, line_seperator, key_value_seperator))
+            if(ParseSection(kv_map, content, line_sep, kv_sep))
             {
                 sec_map["default_section_randomstr_xxxyyyzzz"] = kv_map;
                 return true;
@@ -35,45 +54,52 @@ namespace qh
             return false;
         }  
         
+        //如果有section标记
+        //sec_set存放section名称
         std::vector<std::string> sec_set;
         sec_set.reserve(sec_names.size());
+
+        //pos_set存放setion出现的位置
         std::vector<int> pos_set;
-        pos_set.reserve(sec_names.size());
+        pos_set.reserve(sec_names.size()+1);
 
         for(auto it = sec_names.begin(); it!=sec_names.end();++it)
         {
-            sec_set.push_back(it->first);
-            pos_set.push_back(it->second);
+            pos_set.push_back(it->first);
+            sec_set.push_back(it->second);
         }
-        pos_set.push_back(ini_data_str.length());
+        //为了方便处理，将文件长度存放到pos_set中
+        pos_set.push_back(content.length());
+
+        /*
+        * 保存每一个section的内容，并对其进行处理
+        * 针对这样的格式"[sec_name]content[next_sec_name]...(eof)"，
+        * 利用sec_set和pos_set可以很方便地计算content的长度，进而使用substr取得content内容
+        */
         for(size_t i = 0; i < sec_set.size(); ++i)
         {
             std::string sec_name = sec_set[i];
+            // [sec_name]content[next_sec_name]content2
+            //[owner]\nname=John Doe\norganization=Acme Products\n[database]\nserver=192.0.2.42"
             int skip_length = pos_set[i] + sec_name.length() + 2;
-            std::string content = ini_data_str.substr(skip_length, pos_set[i+1]-skip_length);
+            std::string sec_content = content.substr(skip_length, pos_set[i+1]-skip_length);
+
             ssmap tmp_kv_map;
-            if(!ParseSection(tmp_kv_map, content, line_seperator, key_value_seperator))
+            if(!ParseSection(tmp_kv_map, sec_content, line_sep, kv_sep))
                 return false;
-            sec_map[sec_name] =tmp_kv_map;
+            
+            //设置sec_map
+            sec_map[sec_name] = tmp_kv_map;
         }
         return true;
         
     }
 
+    //默认section名称为"default_section_randomstr_xxxyyyzzz"，可以使用重载
     const std::string& INIParser::Get(const std::string &key, bool *found)
     {
-        find_result.clear();
-        auto kv_map = sec_map["default_section_randomstr_xxxyyyzzz"];
-        auto it = kv_map.find(key);
-        if(it != kv_map.end())
-        {
-            *found = true;
-            find_result = it->second;
-        }
-        else
-        {
-            *found = false;
-        }
+        std::string sec_name = "default_section_randomstr_xxxyyyzzz";   
+        Get(sec_name, key, found);
         return find_result;
         
     }
@@ -115,11 +141,13 @@ namespace qh
                 --i;
             }
         }
+
+        //赋新值，并释放多余空间
         content.swap(newContent);
         content.shrink_to_fit();
     }
 
-    void INIParser::setSecName(std::string &content, std::unordered_map<std::string, int> &sec_names)
+    void INIParser::setSecName(const std::string &content, std::map<int, std::string> &sec_names)
     {
         for(size_t i = 0;i<content.length();)
         {
@@ -128,16 +156,19 @@ namespace qh
                 int sec_start = i + 1;
                 while(content[i++]!=']');
                 int sec_name_len = i - sec_start - 1;
-                sec_names[content.substr(sec_start, sec_name_len)] = sec_start - 1;
+                sec_names[sec_start - 1] = content.substr(sec_start, sec_name_len);
             }
             else
                 ++i;
         }
+        
     }
+
     bool INIParser::ParseSection(ssmap &kv_map, const std::string &section_content, const std::string &line_sep, const std::string &kv_sep)
     {
         size_t found = 0;
         size_t pos = 0;
+        std::vector<std::string> params;
 
         // 按line_sep分割字符串，获取param，长度不为0才加入vector<string> params中
         while(pos < section_content.length() && (found = section_content.find(line_sep, pos)) != std::string::npos)
