@@ -26,13 +26,18 @@ namespace qh
         
     }
 
-    bool INIParser::Parse(const char *ini_data, size_t ini_data_len, const std::string &line_seperator, const std::string &key_value_seperator)
+    bool INIParser::Parse(const char *ini_data, 
+                          size_t ini_data_len, 
+                          const std::string &line_seperator,
+                          const std::string &key_value_seperator)
     {
         std::string ini_data_str = ini_data;
         return Parse(ini_data, line_seperator, key_value_seperator);
     }
 
-    bool INIParser::Parse(const std::string& ini_data_str, const std::string &line_sep, const std::string &kv_sep)
+    bool INIParser::Parse(const std::string& ini_data_str, 
+                          const std::string &line_sep, 
+                          const std::string &kv_sep)
     {
         std::map<int, std::string> sec_names;
         std::string content = ini_data_str;
@@ -102,7 +107,9 @@ namespace qh
         
     }
 
-    const std::string& INIParser::Get(const std::string &section, const std::string &key, bool *found)
+    const std::string& INIParser::Get(const std::string &section, 
+                                      const std::string &key, 
+                                      bool *found)
     {
         find_result.clear();
         ssmap kv_map = sec_map[section];
@@ -145,7 +152,8 @@ namespace qh
         content.shrink_to_fit();
     }
 
-    void INIParser::setSecName(const std::string &content, std::map<int, std::string> &sec_names)
+    void INIParser::setSecName(const std::string &content, 
+                               std::map<int, std::string> &sec_names)
     {
         for(size_t i = 0;i<content.length();)
         {
@@ -162,14 +170,18 @@ namespace qh
         
     }
 
-    bool INIParser::ParseSection(ssmap &kv_map, const std::string &section_content, const std::string &line_sep, const std::string &kv_sep)
+    bool INIParser::ParseSection(ssmap &kv_map, 
+                                 const std::string &section_content, 
+                                 const std::string &line_sep,
+                                 const std::string &kv_sep)
     {
         size_t found = 0;
         size_t pos = 0;
         std::vector<std::string> params;
 
         // 按line_sep分割字符串，获取param，长度不为0才加入vector<string> params中
-        while(pos < section_content.length() && (found = section_content.find(line_sep, pos)) != std::string::npos)
+        while(pos < section_content.length() && 
+             (found = section_content.find(line_sep, pos)) != std::string::npos)
         {
             std::string tmp = section_content.substr(pos, found-pos);
             if(tmp.length() > 0)
@@ -198,7 +210,9 @@ namespace qh
     }
 
     //是否成功转换一个键值对
-    bool INIParser::ParsePair(const std::string &line, const std::string &kv_sep, ssmap &kv_map)
+    bool INIParser::ParsePair(const std::string &line, 
+                              const std::string &kv_sep, 
+                              ssmap &kv_map)
     {
         size_t found = 0;
         found = line.find(kv_sep);
