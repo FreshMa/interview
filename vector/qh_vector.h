@@ -8,12 +8,22 @@ namespace qh
     class vector {
     public:
         //ctor
+        /**
+        * 无内存泄漏
+        * 时间复杂度： O(1)
+        * 空间复杂度： O(1)
+        */
         vector()
             : data_(NULL), size_(0), capacity_(1)
         {
             data_ = new T[capacity_];
         }
 
+        /**
+        * 无内存泄漏
+        * 时间复杂度： O(n)
+        * 空间复杂度： O(n)
+        */
         explicit vector( size_t n, const T& value = T())
         {
             size_     = n;
@@ -27,6 +37,11 @@ namespace qh
         }
 
         //添加拷贝构造函数,避免浅拷贝
+        /**
+        * 无内存泄漏
+        * 时间复杂度： O(n)
+        * 空间复杂度： O(n)
+        */
         vector(const vector<T>& rhs)
         {
             size_ = rhs.size_;
@@ -39,6 +54,11 @@ namespace qh
             }
         }
 
+        /**
+        * 无内存泄漏
+        * 时间复杂度： O(n)
+        * 空间复杂度： O(n)
+        */
         vector<T>& operator=(const vector<T>& rhs)
         {
             //自身复制
@@ -61,6 +81,11 @@ namespace qh
         }
 
         //dtor
+        /**
+        * 无内存泄漏
+        * 时间复杂度： O(n) 从后往前调用元素的析构函数
+        * 空间复杂度： O(1)
+        */
         ~vector()
         {
             if (data_)
@@ -70,6 +95,12 @@ namespace qh
         }
 
         //get
+        /**
+        * 以下三个函数的时间复杂度和空间复杂度一样
+        * 无内存泄漏
+        * 时间复杂度： O(1)
+        * 空间复杂度： O(1)
+        */
         size_t size() const
         {
             return size_;
@@ -89,7 +120,12 @@ namespace qh
         }
 
         // set
-        //push_back，当size==capacity时，将capacity变为原来的2倍，并拷贝数据
+        /**
+        * push_back，当size==capacity时，将capacity变为原来的2倍，并拷贝数据
+        * 无内存泄漏
+        * 时间复杂度： 最好O(1)，最坏O(n)，主要看需不需要重新分配空间
+        * 空间复杂度： 最好O(1), 最坏O(n)
+        */
         void push_back(const T& element)
         {
             if(size_ == capacity_)
@@ -100,11 +136,21 @@ namespace qh
         }
 
         //pop_back弹出最后一个元素，更改指针(size_)即可
+        /*
+        * 无内存泄漏
+        * 时间复杂度： O(1)
+        * 空间复杂度： O(1)
+        */
         void pop_back()
         {
             --size_;
         }
         //参考stl的resize实现，resize一定会改变size的大小，且初始化多余的空间
+        /*
+        * 无内存泄漏
+        * 时间复杂度： 最好O(1)，最坏O(n)
+        * 空间复杂度： 最好O(1)，最坏O(n)
+        */
         void resize(size_t n)
         {
             if(n > size_ && n <= capacity_)
@@ -126,6 +172,11 @@ namespace qh
         }
 
         //参考stl的reserve实现，只改变capacity，不改变size，且重新分配空间时不初始化多余空间
+        /*
+        * 无内存泄漏
+        * 时间复杂度： 最好O(1)，最坏O(n)
+        * 空间复杂度： 最好O(1)，最坏O(n)
+        */
         void reserve(size_t n)
         {
             if(n > capacity_)
@@ -133,7 +184,12 @@ namespace qh
                 reAlloc(n);
             }
         }
-
+        
+        /*
+        * 无内存泄漏
+        * 时间复杂度： O(n)
+        * 空间复杂度： O(n)
+        */
         void reAlloc(size_t n)
         {
             T *tmp = new T[n];
@@ -148,6 +204,11 @@ namespace qh
             capacity_ = n;
         }
 
+        /*
+        * 以下两个函数无内存泄漏，且
+        * 时间复杂度： O(1)
+        * 空间复杂度： O(1)
+        */
         void clear()
         {
             size_ = 0;

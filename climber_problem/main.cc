@@ -22,10 +22,18 @@ struct Node
     //要保证在相同的点上，左边(left edge)排在右边(right edge)前面，所以应该是isLeft>rNode.isLeft
     bool operator<(const Node &rNode) const
     {
-        return xpos < rNode.xpos || xpos == rNode.xpos && isLeft > rNode.isLeft;
+        return (xpos < rNode.xpos) || (xpos == rNode.xpos && isLeft > rNode.isLeft);
     }
 };
 
+/**
+* 无内存泄漏
+* 时间复杂度： O(n+nlogn), n为山峰数量。首先遍历存放数据到Node对象中，然后对node_vector进行排序，
+*            最后再次遍历node_vector, 所以整体复杂度为O(n+nlogn)
+* 空间复杂度： O(n)，n为山峰数量，Node存放了一座山峰的信息，node_vec存放了所有山峰的信息，
+             multiset是辅助哈希表，存放当前访问的线段。所以空间复杂度也是O(n)。
+*            
+*/
 int resolve(const char *input)
 {
     string s = input;
@@ -62,7 +70,7 @@ int resolve(const char *input)
 
     //扫描线算法计算纵坐标上的路程
     sort(nodevec.begin(), nodevec.end());
-    for (int i = 0; i < nodevec.size(); ++i)
+    for (size_t i = 0; i < nodevec.size(); ++i)
     {
         if (nodevec[i].isLeft == 1)
         {

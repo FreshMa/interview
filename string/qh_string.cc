@@ -13,16 +13,32 @@ namespace qh
         data_[0] = '\0';
     }
 
+    /**
+    * 
+    * 时间复杂度： O(n)，n为s的长度
+    * 空间复杂度： O(n)，构造了新的字符串
+    * 无内存泄漏
+    */
     string::string( const char* s )
     {
         assign(s,strlen(s));
     }
-
+    /**
+    * 时间复杂度： O(n)，n为s的长度
+    * 空间复杂度： O(len)，构造了新的字符串
+    * 无内存泄漏
+    */
     string::string( const char* s, size_t len )
     {
         assign(s,len);
     }
 
+    /**
+    * 以下两个函数时间和空间复杂度一样
+    * 时间复杂度： O(n)，n为s的长度
+    * 空间复杂度： O(n)，构造了新的字符串
+    * 无内存泄漏
+    */
     string::string( const string& rhs )
     {
         assign(rhs.c_str(),rhs.size());
@@ -40,6 +56,11 @@ namespace qh
         return *this;
     }
 
+    /**
+    * 析构函数，防止内存泄漏
+    * 时间复杂度： O(n)，从后往前删除元素
+    * 空间复杂度： O(1)
+    */
     string::~string()
     {
         // 判断可以省略，因为data_不可能为NULL
@@ -47,6 +68,12 @@ namespace qh
             delete [] data_;
     }
 
+    /**
+    * 以下四个函数空间复杂度和时间复杂度一样
+    * 时间复杂度： O(1)
+    * 空间复杂度：O(1)，不需要额外空间
+    * 无内存泄漏
+    */
     size_t string::size() const
     {
         return len_;
@@ -71,6 +98,12 @@ namespace qh
         else
             return NULL;
     }
+
+    /**
+    * 时间复杂度： O(n)，n为s的长度
+    * 空间复杂度： O(n)，构造了新的字符串
+    * 无内存泄漏
+    */
     void string::assign(const char* s, int len)
     {
         len_ = len;

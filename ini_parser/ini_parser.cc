@@ -9,23 +9,35 @@ namespace qh
     INIParser::INIParser(){}
     INIParser::~INIParser(){}
 
+    /**
+    * 转换文件，读取文件到内存进行转换
+    * 无内存泄漏，文件句柄已关闭
+    * 时间复杂度： O(n), n为字符串长度。
+    * 空间复杂度： O(n), n为字符串长度
+    */
     bool INIParser::Parse(const std::string &ini_file_path)
     {
         std::ifstream ini_file(ini_file_path);
         if(!ini_file)
             return false;
+
         std::string ini_data;
         std::string tmp;
+
         while(std::getline(ini_file, tmp)){
             ini_data.append(tmp);
             ini_data.push_back('\n');
         }
-        //std::cout<<ini_data<<std::endl;
+        
         ini_file.close();
         return Parse(ini_data, "\n", "=");
-        
     }
 
+    /**
+    * 无内存泄漏，文件句柄已关闭
+    * 时间复杂度： O(n), n为字符串长度。
+    * 空间复杂度： O(n), n为字符串长度
+    */
     bool INIParser::Parse(const char *ini_data, 
                           size_t ini_data_len, 
                           const std::string &line_seperator,
@@ -35,6 +47,12 @@ namespace qh
         return Parse(ini_data, line_seperator, key_value_seperator);
     }
 
+    /**
+    * 转换使用的主要函数，要求key_value_seperator前后没有空格
+    * 无内存泄漏，文件句柄已关闭
+    * 时间复杂度： O(n), n为字符串长度，调用了skipComment和setSecName，还遍历了sec_names。
+    * 空间复杂度： O(n), 使用哈希表来存放sec_names
+    */
     bool INIParser::Parse(const std::string& ini_data_str, 
                           const std::string &line_sep, 
                           const std::string &kv_sep)
@@ -82,8 +100,7 @@ namespace qh
         for(size_t i = 0; i < sec_set.size(); ++i)
         {
             std::string sec_name = sec_set[i];
-            // [sec_name]content[next_sec_name]content2
-            //[owner]\nname=John Doe\norganization=Acme Products\n[database]\nserver=192.0.2.42"
+
             int skip_length = pos_set[i] + sec_name.length() + 2;
             std::string sec_content = content.substr(skip_length, pos_set[i+1]-skip_length);
 
@@ -98,15 +115,24 @@ namespace qh
         
     }
 
+    /**
+    * 无内存泄漏
+    * 时间复杂度： O(1)，使用哈希表，复杂度为O(1)
+    * 空间复杂度： O(1)，常数空间
+    */
     //默认section名称为"default_section_randomstr_xxxyyyzzz"，可以使用重载
     const std::string& INIParser::Get(const std::string &key, bool *found)
     {
         std::string sec_name = "default_section_randomstr_xxxyyyzzz";   
         Get(sec_name, key, found);
         return find_result;
-        
     }
 
+    /**
+    * 无内存泄漏
+    * 时间复杂度： O(1)，使用哈希表，复杂度为O(1)
+    * 空间复杂度： O(1)，常数空间
+    */
     const std::string& INIParser::Get(const std::string &section, 
                                       const std::string &key, 
                                       bool *found)
@@ -126,6 +152,12 @@ namespace qh
         return find_result;
     }
 
+    /**
+    * 删除字符串中的注释
+    * 无内存泄漏
+    * 时间复杂度： O(n)，n为content的长度
+    * 空间复杂度： O(n)，额外空间来保存新的字符串
+    */
     void INIParser::skipComment(std::string &content)
     {
         size_t len = content.length();
@@ -152,6 +184,11 @@ namespace qh
         content.shrink_to_fit();
     }
 
+    /**
+    * 无内存泄漏
+    * 时间复杂度： O(n)，n为content的长度
+    * 空间复杂度： O(n)，使用哈希表来保存section的名称和出现位置
+    */
     void INIParser::setSecName(const std::string &content, 
                                std::map<int, std::string> &sec_names)
     {
@@ -170,6 +207,13 @@ namespace qh
         
     }
 
+
+    /**
+    * 将一个section内的键值对保存到kv_map中
+    * 无内存泄漏
+    * 时间复杂度： O(n)，n为content的长度
+    * 空间复杂度： O(n)，使用哈希表来保存section的名称和出现位置
+    */
     bool INIParser::ParseSection(ssmap &kv_map, 
                                  const std::string &section_content, 
                                  const std::string &line_sep,
@@ -209,7 +253,13 @@ namespace qh
         return true;
     }
 
-    //是否成功转换一个键值对
+    
+    /**
+    * 转换section中的一行数据为key-value对;
+    * 无内存泄漏
+    * 时间复杂度： O(n)，n为line的长度
+    * 空间复杂度： O(n)，使用哈希表来保存键值对
+    */
     bool INIParser::ParsePair(const std::string &line, 
                               const std::string &kv_sep, 
                               ssmap &kv_map)

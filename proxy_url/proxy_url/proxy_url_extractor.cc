@@ -95,6 +95,12 @@ namespace qh
         return sub_url;
     }
 
+    /**
+    * 无内存泄漏
+    * 时间复杂度： O(n)，n为raw_url的长度
+    * 空间复杂度： O(m)，m为key的最大长度
+    * 
+    */
     void ProxyURLExtractor::Extract( const KeyItems& keys, const std::string& raw_url, std::string& sub_url )
     {
 #if 1
