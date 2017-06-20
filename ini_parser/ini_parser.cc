@@ -156,20 +156,18 @@ namespace qh
     * 删除字符串中的注释
     * 无内存泄漏
     * 时间复杂度： O(n)，n为content的长度
-    * 空间复杂度： O(n)，额外空间来保存新的字符串
+    * 空间复杂度： O(1)，不使用额外空间
     */
     void INIParser::skipComment(std::string &content)
     {
         size_t len = content.length();
-        std::string newContent;
-        newContent.reserve(len);
+        size_t i = 0, j = 0;
         
-        for(size_t i = 0;i < len; )
+        while(i < len)
         {
             if(content[i] != ';' && content[i] != '#')
             {
-                newContent.push_back(content[i]);
-                ++i;
+                content[j++] = content[i++];
             }
             else
             {
@@ -179,9 +177,10 @@ namespace qh
             }
         }
 
-        //赋新值，并释放多余空间
-        content.swap(newContent);
+        //释放多余空间
+        content.erase(content.begin() + j, content.end());
         content.shrink_to_fit();
+
     }
 
     /**
