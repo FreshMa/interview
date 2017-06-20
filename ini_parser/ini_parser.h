@@ -40,7 +40,7 @@ namespace qh
 
         const std::string& Get(const std::string& section, const std::string& key, bool* found);
 
-    //private:
+    private:
         using ssmap = std::unordered_map<std::string, std::string>;
         
         //存储Get的结果，防止返回局部变量的引用
