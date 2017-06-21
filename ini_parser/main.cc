@@ -117,7 +117,7 @@ void test5()
     assert(!found);
 
     const std::string& f = parser.Get("database", "file",&found);
-    assert(f=="\"acme payroll.dat\"");
+    assert(f == "\"acme payroll.dat\"");
 }
 
 void test6()
