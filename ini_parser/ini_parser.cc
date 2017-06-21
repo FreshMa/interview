@@ -44,7 +44,7 @@ namespace qh
                           const std::string &key_value_seperator)
     {
         std::string ini_data_str = ini_data;
-        return Parse(ini_data, line_seperator, key_value_seperator);
+        return Parse(ini_data_str, line_seperator, key_value_seperator);
     }
 
     /**
@@ -97,6 +97,16 @@ namespace qh
         * 针对这样的格式"[sec_name]content[next_sec_name]...(eof)"，
         * 利用sec_set和pos_set可以很方便地计算content的长度，进而使用substr取得content内容
         */
+        //以默认section开头
+        if(pos_set[0] != 0){
+            ssmap kv_map;
+            std::string default_con = content.substr(0,pos_set[0]);
+            if(!ParseSection(kv_map, default_con, line_sep, kv_sep)){
+                return false;
+            }
+            sec_map["default_section_randomstr_xxxyyyzzz"] = kv_map;
+        }
+
         for(size_t i = 0; i < sec_set.size(); ++i)
         {
             std::string sec_name = sec_set[i];
@@ -107,7 +117,6 @@ namespace qh
             ssmap tmp_kv_map;
             if(!ParseSection(tmp_kv_map, sec_content, line_sep, kv_sep))
                 return false;
-            
             //设置sec_map
             sec_map[sec_name] = tmp_kv_map;
         }

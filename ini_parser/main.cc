@@ -123,7 +123,6 @@ void test5()
 void test6()
 {
     const char* ini_text = "[owner]\nname=John Doe\norganization=Acme Products\n[database]\nserver=192.0.2.42";
-    //; use IP address in case network name resolution is not working\nport=143\nfile = \"acme payroll.dat\"";
     qh::INIParser parser;
     bool found = false;
     if(!parser.Parse(ini_text, strlen(ini_text), "\n", "="))
@@ -147,6 +146,32 @@ void test6()
 
 }
 
+//以默认section开头的ini
+void test7()
+{
+    const char* ini_text = "port=143\n[owner]\nname=John Doe\norganization=Acme Products\n[database]\nserver=192.0.2.42";
+    qh::INIParser parser;
+    bool found = false;
+    if(!parser.Parse(ini_text, strlen(ini_text), "\n", "="))
+        assert(false);
+    
+    const std::string& a = parser.Get("port", &found);
+    assert(a == "143");
+    assert(found);
+
+    const std::string& org = parser.Get("owner", "organization", &found);
+    assert(org == "Acme Products");
+    assert(found);
+
+    const std::string& ip = parser.Get("database", "server", &found);
+    assert(ip == "192.0.2.42");
+    assert(found);
+
+    const std::string& age = parser.Get("owner", "age", &found);
+    assert(age == "");
+    assert(!found);
+
+}
 
 int main(int argc, char* argv[])
 {
@@ -157,7 +182,7 @@ int main(int argc, char* argv[])
     test4();
     test5();
     test6();
-
+    test7();
     return 0;
 }
 
