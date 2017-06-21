@@ -181,7 +181,7 @@ namespace qh
             else
             {
                 //不删除换行符
-                while(content[i++]!='\n');
+                while(i < len && content[i++]!='\n');
                 --i;
             }
         }
